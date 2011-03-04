@@ -8,6 +8,24 @@ distributed across the set of queues with pending jobs fairly.  This
 results in a much more predictable mean time to handling for jobs in
 queues that are not the first in the list.
 
+Weighted Priorites
+----
+
+resque-fairly works by sorting the queues randomly before assigning
+the next queue on the list to a worker. You can add weights to 
+your various queues to alter their likelihood of being selected, by 
+using /priorities/. The priorities select queues by regular expression.
+
+Example:
+
+    Resque::Plugins::Fairly.prioritize(/^a/, 2)
+
+The above will prioritize queues whose names start with 'a' to
+be selected twice as often as the default.
+
+You can use floating point numbers, 0 and/or negative numbers as
+the multiplier.
+
 Note on Patches/Pull Requests
 ----
  
