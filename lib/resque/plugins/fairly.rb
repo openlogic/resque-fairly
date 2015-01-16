@@ -6,7 +6,7 @@ module Resque::Plugins
     # matches the specified regex
     def self.prioritize(regex, multiplier)
       raise ArgumentError, '`regex` must be a regular expression' unless Regexp === regex
-      priorities << [regex, multiplier]
+      priorities << {regex: regex, multiplier: multiplier}
     end
     
     def self.priorities
@@ -24,9 +24,16 @@ module Resque::Plugins
     # If priorities have been established, the randomness of the order
     # will be weighted according to the multipliers
     def queues_randomly_ordered
-      queues_alpha_ordered.sort_by do |queue|
-        multiplier = Fairly.priorities.select{|p|p[0] === queue}[0][1] rescue 1
-        rand * multiplier
+      queues_alpha_ordered.reject do |queue|
+        Fairly.priorities.any? do |priority|
+          priority[:multiplier] == 0 && priority[:regex] === queue
+        end
+      end.sort_by do |queue|
+        ([rand] + Fairly.priorities.select do |priority|
+          priority[:regex] === queue
+        end.map do |priority|
+          priority[:multiplier]
+        end).reduce(&:*)
       end.reverse
     end
 

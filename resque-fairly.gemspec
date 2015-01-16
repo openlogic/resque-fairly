@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{resque-fairly}
-  s.version = "1.1.0"
+  s.version = "1.2.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
-  s.authors = ["Peter Williams"]
-  s.date = %q{2011-03-04}
+  s.authors = ["Peter Williams", "Cameron Mauch"]
+  s.date = %q{2015-01-16}
   s.description = %q{Normally resque processes queues in a fixed order.  This can lead to jobs in queues at the end of the list not getting process for very long periods.  resque-fairly provides a mechanism where by workers are distributed across the set of queues with pending jobs fairly.  This results in a much more predictable mean time to handling for jobs in queues that are not the first in the list.
 }
   s.email = %q{pezra@barelyenough.org}
@@ -30,7 +30,7 @@ Gem::Specification.new do |s|
     "spec/spec.opts",
     "spec/spec_helper.rb"
   ]
-  s.homepage = %q{http://github.com/pezra/resque-fairly}
+  s.homepage = %q{http://github.com/openlogic/resque-fairly}
   s.require_paths = ["lib"]
   s.rubygems_version = %q{1.3.7}
   s.summary = %q{Fair queue processing for Resque}

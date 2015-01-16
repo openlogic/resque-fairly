@@ -23,8 +23,11 @@ Example:
 The above will prioritize queues whose names start with 'a' to
 be selected twice as often as the default.
 
-You can use floating point numbers, 0 and/or negative numbers as
-the multiplier.
+You can use any floating point number as the multiplier, with 0 having
+the special behavior of completely eliminating the chance of any matching
+queue from being selected.  If a queue is matched by more than one
+priority, the final weight will be the product of all the matching
+weights.
 
 Note on Patches/Pull Requests
 ----

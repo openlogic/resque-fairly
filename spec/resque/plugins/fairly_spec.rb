@@ -29,4 +29,11 @@ describe Resque::Plugins::Fairly do
     as.size.should == 66
     bs.size.should == 34
   end
+
+  it "changes Resque::Worker#queues to return queues with zero weight matches eliminated" do
+    worker = Resque::Worker.new('a','b','c')
+    Resque::Plugins::Fairly.prioritize(/c/, 0)
+
+    worker.queues.include?('c').should == false
+  end
 end
