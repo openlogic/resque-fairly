@@ -23,11 +23,28 @@ Example:
 The above will prioritize queues whose names start with 'a' to
 be selected twice as often as the default.
 
-You can use any floating point number as the multiplier, with 0 having
-the special behavior of completely eliminating the chance of any matching
-queue from being selected.  If a queue is matched by more than one
-priority, the final weight will be the product of all the matching
-weights.
+You can use any floating point number as the multiplier. If a queue is
+matched by more than one priority, the final weight will be the product
+of all the matching weights.
+
+Only and Except filters
+----
+
+Also filters the queues based on one or more regular expressions to
+include and/or exclude the matching queues.  Note:  All these methods
+are also chainable.
+
+Examples:
+
+    Resque::Plugins::Fairly.only(/foo/).except(/foobar/)
+
+The above will return a randomized list of queues which contain the
+text 'foo', but not the text 'foobar'
+
+Reset
+----
+
+Clears all priorities and only and except filters.
 
 Note on Patches/Pull Requests
 ----
