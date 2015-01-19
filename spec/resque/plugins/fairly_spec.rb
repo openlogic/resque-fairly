@@ -17,10 +17,10 @@ describe Resque::Plugins::Fairly do
 
   it "changes Resque::Worker#queues to return queues in a weighted random order" do
     worker = Resque::Worker.new('a','b')
-    Resque::Plugins::Fairly.prioritize(/a/, 2)
+    Resque::Plugins::Fairly.reset.prioritize(/a/, 2)
 
     as, bs = [], []
-    1.upto 100 do 
+    1.upto 100 do
       arr = worker.queues
       as << arr if arr.first == 'a'
       bs << arr if arr.first == 'b'
@@ -30,10 +30,17 @@ describe Resque::Plugins::Fairly do
     bs.size.should == 34
   end
 
-  it "changes Resque::Worker#queues to return queues with zero weight matches eliminated" do
-    worker = Resque::Worker.new('a','b','c')
-    Resque::Plugins::Fairly.prioritize(/c/, 0)
+  it "changes Resque::Worker#queues to return queues with only queues only" do
+    worker = Resque::Worker.new('d','e','f')
+    Resque::Plugins::Fairly.reset.only(/e/)
 
-    worker.queues.include?('c').should == false
+    worker.queues.should == ['e']
+  end
+
+  it "changes Resque::Worker#queues to return queues without except queues" do
+    worker = Resque::Worker.new('g','h','i')
+    Resque::Plugins::Fairly.reset.except(/h/)
+
+    worker.queues.should =~ ['g', 'i']
   end
 end

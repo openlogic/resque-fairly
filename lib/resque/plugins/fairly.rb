@@ -4,13 +4,37 @@ module Resque::Plugins
   module Fairly
     # Define an 'unfair' priority multiplier to queues whose name
     # matches the specified regex
-    def self.prioritize(regex, multiplier)
+    def self.prioritize(regex, weight)
       raise ArgumentError, '`regex` must be a regular expression' unless Regexp === regex
-      priorities << {regex: regex, multiplier: multiplier}
+      options[:priority] << {regex: regex, weight: weight}
+      self
+    end
+
+    def self.only(regex)
+      raise ArgumentError, '`regex` must be a regular expression' unless Regexp === regex
+      options[:only] << regex
+      self
     end
     
-    def self.priorities
-      @priorities ||= []
+    def self.except(regex)
+      raise ArgumentError, '`regex` must be a regular expression' unless Regexp === regex
+      options[:except] << regex
+      self
+    end
+
+    def self.reset(list = [:priority, :only, :except])
+      list.each do |option|
+        options[option] = []
+      end
+      self
+    end
+    
+    def self.options
+      @options ||= {
+        priority: [],
+        only:     [],
+        except:   []
+      }
     end
 
     # Returns a list of queues to use when searching for a job.  A
@@ -24,17 +48,16 @@ module Resque::Plugins
     # If priorities have been established, the randomness of the order
     # will be weighted according to the multipliers
     def queues_randomly_ordered
-      queues_alpha_ordered.reject do |queue|
-        Fairly.priorities.any? do |priority|
-          priority[:multiplier] == 0 && priority[:regex] === queue
-        end
-      end.sort_by do |queue|
-        ([rand] + Fairly.priorities.select do |priority|
-          priority[:regex] === queue
-        end.map do |priority|
-          priority[:multiplier]
-        end).reduce(&:*)
-      end.reverse
+      list = queues_alpha_ordered
+
+      list = select_only_queues(list)   if Fairly.options[:only].any?
+      list = reject_except_queues(list) if Fairly.options[:except].any?
+
+      list = list.sort_by do |item|
+        weights = [rand] + priority_weights(item)
+        weight = weights.reduce(&:*)
+      end
+      list = list.reverse
     end
 
     def self.included(klass)
@@ -43,9 +66,35 @@ module Resque::Plugins
         alias_method :queues, :queues_randomly_ordered
       end
     end
-  end
+
+    private
+
+    def select_only_queues(list)
+      list.select do |item|
+        Fairly.options[:only].any? do |regex|
+          regex === item
+        end
+      end
+    end
+
+    def reject_except_queues(list)
+      list.reject do |item|
+        Fairly.options[:except].any? do |regex|
+          regex === item
+        end
+      end
+    end
+
+    def priority_weights(item)
+      priorities = Fairly.options[:priority].select do |priority|
+        priority[:regex] === item
+      end
+
+      weights = priorities.map do |priority|
+        priority[:weight]
+      end
+    end
+ end
 
   Resque::Worker.send(:include, Fairly)
 end
-
-
