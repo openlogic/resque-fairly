@@ -12,8 +12,6 @@ DESC
     gem.email = "cameron.mauch@roguewave.com"
     gem.homepage = "http://github.com/openlogic/resque-fairly"
     gem.authors = ["D Cameron Mauch", "Peter Williams"]
-    gem.add_dependency "resque", "~>1.0"
-    gem.add_development_dependency "rspec", ">= 1.2.9"
     # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
   end
   Jeweler::GemcutterTasks.new
